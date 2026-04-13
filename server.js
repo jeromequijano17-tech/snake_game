@@ -24,7 +24,7 @@ db.connect(err => {
 
 // Home page (form + data)
 app.get("/", (req, res) => {
-  res.send("Hello! Your Node.js app is running on Render 🚀");
+  res.send("Hello! Your Node.js app is running");
 });
 
 // Start server
