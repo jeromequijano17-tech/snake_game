@@ -1,25 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Flappy Bird</title>
+<title>Snake Game</title>
 
 <style>
 
 body{
-    margin:0;
-    background:#70c5ce;
-    font-family:Arial;
+    background:#111;
     text-align:center;
+    font-family:Arial;
+    color:white;
 }
 
 canvas{
-    display:block;
-    margin:auto;
-    background:#70c5ce;
+    background:black;
+    border:3px solid lime;
 }
 
-h2{
-    color:white;
+button{
+    padding:10px 20px;
+    font-size:16px;
+    margin-top:10px;
 }
 
 </style>
@@ -28,113 +29,163 @@ h2{
 
 <body>
 
-<h2>Flappy Bird 🐦 (Press SPACE to Jump)</h2>
+<h1>Snake Game 🐍</h1>
 
-<canvas id="game" width="400" height="500"></canvas>
+<canvas id="game" width="400" height="400"></canvas>
+
+<br>
+<button onclick="restartGame()">Restart Game</button>
 
 <script>
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let birdX = 80;
-let birdY = 150;
-let gravity = 0.5;
-let velocity = 0;
+const box = 20;
 
-let pipes = [];
+let snake;
+let food;
+let direction;
+let game;
 
-let pipeWidth = 60;
-let gap = 140;
+startGame();
 
-let score = 0;
-let gameOver = false;
+document.addEventListener("keydown", changeDirection);
 
 
-document.addEventListener("keydown", jump);
-document.addEventListener("click", jump);
+function startGame(){
 
+snake = [
+    {x:9*box,y:10*box}
+];
 
-function jump(){
+food = {
+    x:Math.floor(Math.random()*20)*box,
+    y:Math.floor(Math.random()*20)*box
+};
 
-if(gameOver){
+direction = null;
 
-restartGame();
-return;
+clearInterval(game);
 
-}
-
-velocity = -8;
-
-}
-
-
-function createPipe(){
-
-let topHeight = Math.random()*250 + 50;
-
-pipes.push({
-
-x:400,
-top:topHeight,
-bottom:topHeight + gap
-
-});
+game = setInterval(drawGame,120);
 
 }
 
 
-function drawBird(){
+function changeDirection(event){
 
-ctx.fillStyle="yellow";
+if(event.key==="ArrowLeft" && direction!=="RIGHT")
+direction="LEFT";
 
-ctx.beginPath();
+else if(event.key==="ArrowUp" && direction!=="DOWN")
+direction="UP";
 
-ctx.arc(birdX,birdY,15,0,Math.PI*2);
+else if(event.key==="ArrowRight" && direction!=="LEFT")
+direction="RIGHT";
 
-ctx.fill();
-
-}
-
-
-function drawPipe(pipe){
-
-ctx.fillStyle="green";
-
-ctx.fillRect(pipe.x,0,pipeWidth,pipe.top);
-
-ctx.fillRect(pipe.x,pipe.bottom,pipeWidth,500);
+else if(event.key==="ArrowDown" && direction!=="UP")
+direction="DOWN";
 
 }
 
 
-function drawScore(){
+function drawGame(){
 
-ctx.fillStyle="white";
+ctx.fillStyle="black";
+ctx.fillRect(0,0,400,400);
 
-ctx.font="24px Arial";
 
-ctx.fillText("Score: "+score,10,30);
+for(let i=0;i<snake.length;i++){
+
+ctx.fillStyle=i===0?"lime":"green";
+
+ctx.fillRect(
+snake[i].x,
+snake[i].y,
+box,
+box
+);
 
 }
 
 
-function collision(pipe){
+ctx.fillStyle="red";
+
+ctx.fillRect(
+food.x,
+food.y,
+box,
+box
+);
+
+
+let snakeX=snake[0].x;
+let snakeY=snake[0].y;
+
+
+if(direction==="LEFT") snakeX-=box;
+if(direction==="UP") snakeY-=box;
+if(direction==="RIGHT") snakeX+=box;
+if(direction==="DOWN") snakeY+=box;
+
 
 if(
+snakeX===food.x &&
+snakeY===food.y
+){
 
-birdX+15 > pipe.x &&
-birdX-15 < pipe.x+pipeWidth &&
-(
+food={
+x:Math.floor(Math.random()*20)*box,
+y:Math.floor(Math.random()*20)*box
+};
 
-birdY-15 < pipe.top ||
-birdY+15 > pipe.bottom
+}
+else{
 
-)
+snake.pop();
 
+}
+
+
+const newHead={
+x:snakeX,
+y:snakeY
+};
+
+
+if(
+snakeX<0 ||
+snakeY<0 ||
+snakeX>=400 ||
+snakeY>=400 ||
+collision(newHead,snake)
+){
+
+clearInterval(game);
+
+alert("Game Over!");
+
+}
+
+
+snake.unshift(newHead);
+
+}
+
+
+function collision(head,array){
+
+for(let i=0;i<array.length;i++){
+
+if(
+head.x===array[i].x &&
+head.y===array[i].y
 ){
 
 return true;
+
+}
 
 }
 
@@ -143,122 +194,11 @@ return false;
 }
 
 
-function update(){
-
-if(gameOver) return;
-
-
-velocity += gravity;
-
-birdY += velocity;
-
-
-if(birdY > 500 || birdY < 0){
-
-endGame();
-
-}
-
-
-for(let i=0;i<pipes.length;i++){
-
-pipes[i].x -= 2;
-
-
-if(collision(pipes[i])){
-
-endGame();
-
-}
-
-
-if(pipes[i].x === 80){
-
-score++;
-
-}
-
-}
-
-
-if(pipes.length === 0 || pipes[pipes.length-1].x < 200){
-
-createPipe();
-
-}
-
-}
-
-
-function draw(){
-
-ctx.clearRect(0,0,400,500);
-
-
-drawBird();
-
-
-for(let pipe of pipes){
-
-drawPipe(pipe);
-
-}
-
-
-drawScore();
-
-
-if(gameOver){
-
-ctx.fillStyle="white";
-
-ctx.font="40px Arial";
-
-ctx.fillText("Game Over",120,250);
-
-ctx.font="20px Arial";
-
-ctx.fillText("Press SPACE or Click",130,300);
-
-}
-
-}
-
-
-function endGame(){
-
-gameOver = true;
-
-}
-
-
 function restartGame(){
 
-birdY = 150;
-
-velocity = 0;
-
-pipes = [];
-
-score = 0;
-
-gameOver = false;
+startGame();
 
 }
-
-
-function gameLoop(){
-
-update();
-
-draw();
-
-requestAnimationFrame(gameLoop);
-
-}
-
-
-gameLoop();
 
 </script>
 
