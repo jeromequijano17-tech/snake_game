@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Snake Game</title>
+
+<style>
+
+body{
+    background:#111;
+    text-align:center;
+    font-family:Arial;
+    color:white;
+}
+
+canvas{
+    background:black;
+    border:3px solid lime;
+}
+
+button{
+    padding:10px 20px;
+    font-size:16px;
+    margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Snake Game 🐍</h1>
+
+<canvas id="game" width="400" height="400"></canvas>
+
+<br>
+<button onclick="restartGame()">Restart Game</button>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const box = 20;
+
+let snake;
+let food;
+let direction;
+let game;
+
+startGame();
+
+document.addEventListener("keydown", changeDirection);
+
+
+function startGame(){
+
+snake = [
+    {x:9*box,y:10*box}
+];
+
+food = {
+    x:Math.floor(Math.random()*20)*box,
+    y:Math.floor(Math.random()*20)*box
+};
+
+direction = null;
+
+clearInterval(game);
+
+game = setInterval(drawGame,120);
+
+}
+
+
+function changeDirection(event){
+
+if(event.key==="ArrowLeft" && direction!=="RIGHT")
+direction="LEFT";
+
+else if(event.key==="ArrowUp" && direction!=="DOWN")
+direction="UP";
+
+else if(event.key==="ArrowRight" && direction!=="LEFT")
+direction="RIGHT";
+
+else if(event.key==="ArrowDown" && direction!=="UP")
+direction="DOWN";
+
+}
+
+
+function drawGame(){
+
+ctx.fillStyle="black";
+ctx.fillRect(0,0,400,400);
+
+
+for(let i=0;i<snake.length;i++){
+
+ctx.fillStyle=i===0?"lime":"green";
+
+ctx.fillRect(
+snake[i].x,
+snake[i].y,
+box,
+box
+);
+
+}
+
+
+ctx.fillStyle="red";
+
+ctx.fillRect(
+food.x,
+food.y,
+box,
+box
+);
+
+
+let snakeX=snake[0].x;
+let snakeY=snake[0].y;
+
+
+if(direction==="LEFT") snakeX-=box;
+if(direction==="UP") snakeY-=box;
+if(direction==="RIGHT") snakeX+=box;
+if(direction==="DOWN") snakeY+=box;
+
+
+if(
+snakeX===food.x &&
+snakeY===food.y
+){
+
+food={
+x:Math.floor(Math.random()*20)*box,
+y:Math.floor(Math.random()*20)*box
+};
+
+}
+else{
+
+snake.pop();
+
+}
+
+
+const newHead={
+x:snakeX,
+y:snakeY
+};
+
+
+if(
+snakeX<0 ||
+snakeY<0 ||
+snakeX>=400 ||
+snakeY>=400 ||
+collision(newHead,snake)
+){
+
+clearInterval(game);
+
+alert("Game Over!");
+
+}
+
+
+snake.unshift(newHead);
+
+}
+
+
+function collision(head,array){
+
+for(let i=0;i<array.length;i++){
+
+if(
+head.x===array[i].x &&
+head.y===array[i].y
+){
+
+return true;
+
+}
+
+}
+
+return false;
+
+}
+
+
+function restartGame(){
+
+startGame();
+
+}
+
+</script>
+
+</body>
+</html>
