@@ -5,7 +5,6 @@ const bodyParser = require("body-parser");
 const app = express();
 const PORT = 3000;
 
-// middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // database connection
@@ -18,61 +17,178 @@ const db = mysql.createConnection({
 });
 
 db.connect(err => {
-  if (err) {
-    console.log("Database connection failed");
-  } else {
-    console.log("Connected to MySQL");
-  }
+  if (err) console.log("Database connection failed");
+  else console.log("Connected to MySQL");
 });
 
 
-// READ (Display students)
+// MAIN PAGE
 app.get("/", (req, res) => {
 
   db.query("SELECT * FROM students", (err, results) => {
 
     let html = `
-    <h1>Student CRUD System</h1>
+<html>
 
-    <h2>Add Student</h2>
+<head>
 
-    <form method="POST" action="/add">
-      Name: <input name="stud_name" required><br>
-      Address: <input name="stud_address" required><br>
-      Age: <input name="age" required><br>
-      <button>Add Student</button>
-    </form>
+<title>Student System</title>
 
-    <h2>Student List</h2>
+<style>
 
-    <table border="1">
-    <tr>
-      <th>ID</th>
-      <th>Name</th>
-      <th>Address</th>
-      <th>Age</th>
-      <th>Actions</th>
-    </tr>
-    `;
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #f0f2f5;
+}
+
+/* Facebook-style header */
+
+.header {
+  background: #1877f2;
+  color: white;
+  padding: 15px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* container */
+
+.container {
+  width: 70%;
+  margin: auto;
+  margin-top: 30px;
+}
+
+/* card layout */
+
+.card {
+  background: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+}
+
+/* input fields */
+
+input {
+  padding: 10px;
+  width: 95%;
+  margin-top: 8px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+/* buttons */
+
+button {
+  background: #1877f2;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #166fe5;
+}
+
+/* student card */
+
+.student {
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+}
+
+.actions a {
+  text-decoration: none;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.edit {
+  color: #1877f2;
+}
+
+.delete {
+  color: red;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+Student CRUD Dashboard
+</div>
+
+<div class="container">
+
+<div class="card">
+
+<h2>Add Student</h2>
+
+<form method="POST" action="/add">
+
+Name:
+<input name="stud_name" required>
+
+Address:
+<input name="stud_address" required>
+
+Age:
+<input name="age" required>
+
+<button>Add Student</button>
+
+</form>
+
+</div>
+
+
+<div class="card">
+
+<h2>Student List</h2>
+`;
 
     results.forEach(student => {
 
       html += `
-      <tr>
-        <td>${student.stud_id}</td>
-        <td>${student.stud_name}</td>
-        <td>${student.stud_address}</td>
-        <td>${student.age}</td>
+<div class="student">
 
-        <td>
-          <a href="/edit/${student.stud_id}">Edit</a>
-          <a href="/delete/${student.stud_id}">Delete</a>
-        </td>
-      </tr>
-      `;
+<b>${student.stud_name}</b><br>
+
+Address: ${student.stud_address}<br>
+
+Age: ${student.age}
+
+<div class="actions">
+
+<a class="edit" href="/edit/${student.stud_id}">Edit</a>
+
+<a class="delete" href="/delete/${student.stud_id}">
+Delete
+</a>
+
+</div>
+
+</div>
+`;
     });
 
-    html += "</table>";
+    html += `
+
+</div>
+</div>
+
+</body>
+</html>
+`;
 
     res.send(html);
 
@@ -81,7 +197,7 @@ app.get("/", (req, res) => {
 });
 
 
-// CREATE
+// ADD
 app.post("/add", (req, res) => {
 
   const { stud_name, stud_address, age } = req.body;
@@ -108,15 +224,65 @@ app.get("/edit/:id", (req, res) => {
       const student = results[0];
 
       res.send(`
-        <h2>Edit Student</h2>
 
-        <form method="POST" action="/update/${id}">
-          Name: <input name="stud_name" value="${student.stud_name}"><br>
-          Address: <input name="stud_address" value="${student.stud_address}"><br>
-          Age: <input name="age" value="${student.age}"><br>
-          <button>Update</button>
-        </form>
-      `);
+<html>
+
+<style>
+
+body {
+  font-family: Arial;
+  background: #f0f2f5;
+}
+
+.card {
+  background: white;
+  width: 40%;
+  margin: auto;
+  margin-top: 80px;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+}
+
+input {
+  width: 95%;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+button {
+  background: #1877f2;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+</style>
+
+<div class="card">
+
+<h2>Edit Student</h2>
+
+<form method="POST" action="/update/${id}">
+
+Name:
+<input name="stud_name" value="${student.stud_name}">
+
+Address:
+<input name="stud_address" value="${student.stud_address}">
+
+Age:
+<input name="age" value="${student.age}">
+
+<button>Update</button>
+
+</form>
+
+</div>
+
+</html>
+`);
 
     }
   );
