@@ -22,7 +22,7 @@ db.connect(err => {
 });
 
 
-// MAIN PAGE
+// MAIN PAGEs
 app.get("/", (req, res) => {
 
   db.query("SELECT * FROM students", (err, results) => {
