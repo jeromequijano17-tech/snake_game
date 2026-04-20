@@ -7,7 +7,7 @@ const PORT = 3000;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// database connection
+// database connections
 const db = mysql.createConnection({
   host: "mysql-37610bae-jeromequijano17-df99.l.aivencloud.com",
   user: "jerome",
