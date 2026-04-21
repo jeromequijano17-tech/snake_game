@@ -9,10 +9,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // DATABASE CONNECTION
 const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "gcash_db"
+    host: "mysql-37610bae-jeromequijano17-df99.l.aivencloud.com",
+  user: "jerome",
+  password: "AVNS_-YAxsM4LYuR2M5SLjeq",
+  database: "gcash_db",
+  port: 23687
 });
 
 db.connect(err => {
